@@ -14,16 +14,6 @@ import java.util.Set;
 public interface Graph<L> {
     
     /**
-     * Create an empty graph.
-     * 
-     * @param <L> type of vertex labels in the graph
-     * @return a new empty weighted directed graph
-     */
-    public static <L> Graph<L> empty() {
-        throw new RuntimeException("not implemented");
-    }
-    
-    /**
      * Add a vertex to this graph.
      * 
      * @param vertex label for the new vertex
