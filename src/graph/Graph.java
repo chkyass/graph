@@ -33,7 +33,7 @@ public interface Graph<L> {
      * @return the previous weight of the edge, or zero if there was no such
      *         edge
      */
-    public int set(L source, L target, int weight);
+    public int set(L source, L target, double weight);
     
     /**
      * Remove a vertex from this graph; any edges to or from the vertex are
@@ -62,7 +62,7 @@ public interface Graph<L> {
      *         the value for each key is the (nonzero) weight of the edge from
      *         the key to target
      */
-    public Map<L, Integer> sources(L target);
+    public Map<L, Double> sources(L target);
     
     /**
      * Get the target vertices with directed edges from a source vertex and the
@@ -74,6 +74,6 @@ public interface Graph<L> {
      *         the value for each key is the (nonzero) weight of the edge from
      *         source to the key
      */
-    public Map<L, Integer> targets(L source);
+    public Map<L, Double> targets(L source);
     
 }
