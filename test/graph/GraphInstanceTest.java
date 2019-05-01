@@ -88,7 +88,7 @@ public abstract class GraphInstanceTest {
     public void testAddMultiples() {
         Graph<String> graph = emptyInstance();
         assertTrue("expected add success", graph.add("a"));
-        assertFalse("expected add success", graph.add("b"));
+        assertTrue("expected add success", graph.add("b"));
         assertTrue("expected not empty graph", graph.vertices().containsAll(Arrays.asList("a","b")));      
     }
     
@@ -114,8 +114,8 @@ public abstract class GraphInstanceTest {
         assertTrue("expected add success", graph.add("a"));
         assertTrue("expected add success", graph.add("b"));
         assertTrue("expected add success", graph.add("c"));
-        assertFalse("expected remove success", graph.remove("a"));
-        assertFalse("expected remove success", graph.remove("b"));
+        assertTrue("expected remove success", graph.remove("a"));
+        assertTrue("expected remove success", graph.remove("b"));
         assertTrue("expected empty graph", graph.vertices().contains("c"));
     }
     
@@ -146,8 +146,8 @@ public abstract class GraphInstanceTest {
         graph.add("a");
         graph.set("a", "b", -1.3);
         assertTrue("expected contain vertices", graph.vertices().containsAll(Arrays.asList("a", "b")));
-        assertTrue("expected a is source for b", graph.sources("b").get("a") == 1.3);
-        assertTrue("expected b is target for a", graph.targets("a").get("b") == 1.3);
+        assertTrue("expected a is source for b", graph.sources("b").get("a") == -1.3);
+        assertTrue("expected b is target for a", graph.targets("a").get("b") == -1.3);
     }
     
     @Test
@@ -176,28 +176,18 @@ public abstract class GraphInstanceTest {
         graph.set("a", "b", 0);
         graph.set("a", "b", 20);
         assertTrue("expected contain vertices", graph.vertices().containsAll(Arrays.asList("a", "b")));
-        assertTrue("expected a is source for b", graph.sources("a").get("a") == 20);
-        assertTrue("expected b is target for a", graph.targets("a").get("a") == 20);
-    }
-    
-    @Test
-    public void sourceAbsent() {
-        Graph<String> graph = emptyInstance();
-        graph.set("a", "b", 0);
-        assertTrue("expected empty vertices", graph.sources("z").isEmpty());
+        assertTrue("expected a is source for b", graph.sources("b").get("a") == 20);
+        assertTrue("expected b is target for a", graph.targets("a").get("b") == 20);
     }
     
     @Test
     public void sourceMultiplePresent() {
         Graph<String> graph = emptyInstance();
-        graph.set("b", "a", 0);
         graph.set("c", "a", 1);
+        graph.set("b", "a", 0);
 
         assertTrue("expected empty vertices", graph.sources("a").get("b") == 0);
         assertTrue("expected empty vertices", graph.sources("a").get("c") == 1);
-        assertTrue("expected empty vertices", graph.sources("b").isEmpty());
-        assertTrue("expected empty vertices", graph.sources("c").isEmpty());
-
     }
     
     @Test
@@ -208,8 +198,8 @@ public abstract class GraphInstanceTest {
 
         assertTrue("expected empty vertices", graph.targets("a").get("b") == 0);
         assertTrue("expected empty vertices", graph.targets("a").get("c") == 1);
-        assertTrue("expected empty vertices", graph.targets("b").get("c") == 1);
-        assertTrue("expected empty vertices", graph.targets("b").get("c") == 1);
+        assertTrue("expected empty vertices", graph.sources("b").get("a") == 0);
+        assertTrue("expected empty vertices", graph.sources("c").get("a") == 1);
         
     }
 }
