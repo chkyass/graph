@@ -33,7 +33,7 @@ public interface Graph<L> {
      * @return the previous weight of the edge, or zero if there was no such
      *         edge
      */
-    public int set(L source, L target, double weight);
+    public double set(L source, L target, double weight);
     
     /**
      * Remove a vertex from this graph; any edges to or from the vertex are
