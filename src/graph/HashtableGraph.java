@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+
+/*
+ * TODO javadoc
+ */
 public class HashtableGraph implements Graph<String> {
     private HashMap<String, HashMap<String, Double>> graph;    
     private HashMap<String, HashMap<String, Double>> sources;

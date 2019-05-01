@@ -6,4 +6,7 @@ public class HashMapGraphTest extends GraphInstanceTest {
         return new HashtableGraph();
     }
     
+    /*
+     * TODO implem specific tests
+     */
 }
