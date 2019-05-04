@@ -22,6 +22,7 @@ public abstract class GraphInstanceTest {
     // remove:  present
     //          absent
     //          multiple
+    //          loop
     
     // vertices:    empty
     //              singleton
@@ -53,7 +54,7 @@ public abstract class GraphInstanceTest {
      * 
      * @return a new empty graph of the particular implementation being tested
      */
-    public abstract Graph<String> emptyInstance();
+    public abstract <T> Graph<T> emptyInstance();
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
@@ -105,7 +106,7 @@ public abstract class GraphInstanceTest {
         Graph<String> graph = emptyInstance();
         assertTrue("expected add success", graph.add("a"));
         assertFalse("expected remove success", graph.remove("b"));
-        assertTrue("expected empty graph", graph.vertices().contains("a"));
+        assertTrue("expected contains a", graph.vertices().contains("a"));
     }
     
     @Test
@@ -116,7 +117,7 @@ public abstract class GraphInstanceTest {
         assertTrue("expected add success", graph.add("c"));
         assertTrue("expected remove success", graph.remove("a"));
         assertTrue("expected remove success", graph.remove("b"));
-        assertTrue("expected empty graph", graph.vertices().contains("c"));
+        assertTrue("expected contains c", graph.vertices().contains("c"));
     }
     
     @Test
@@ -186,8 +187,8 @@ public abstract class GraphInstanceTest {
         graph.set("c", "a", 1);
         graph.set("b", "a", 0);
 
-        assertTrue("expected empty vertices", graph.sources("a").get("b") == 0);
-        assertTrue("expected empty vertices", graph.sources("a").get("c") == 1);
+        assertTrue("expected b source of a", graph.sources("a").get("b") == 0);
+        assertTrue("expected a source of a", graph.sources("a").get("c") == 1);
     }
     
     @Test
@@ -196,10 +197,21 @@ public abstract class GraphInstanceTest {
         graph.set("a", "b", 0);
         graph.set("a", "c", 1);
 
-        assertTrue("expected empty vertices", graph.targets("a").get("b") == 0);
-        assertTrue("expected empty vertices", graph.targets("a").get("c") == 1);
-        assertTrue("expected empty vertices", graph.sources("b").get("a") == 0);
-        assertTrue("expected empty vertices", graph.sources("c").get("a") == 1);
+        assertTrue("expected b target of a", graph.targets("a").get("b") == 0);
+        assertTrue("expected c target of a", graph.targets("a").get("c") == 1);
+        assertTrue("expected b source of a", graph.sources("b").get("a") == 0);
+        assertTrue("expected a source of c", graph.sources("c").get("a") == 1);
         
     }
+     @Test
+     public void removeLoop() {
+         Graph<Integer> graph = emptyInstance();
+         graph.set(2, 2, 3);
+         graph.set(1, 1, 5);
+         graph.set(3, 9, 0);
+         assertTrue("expect removed", graph.remove(2));
+         assertTrue("expect removed", graph.vertices().containsAll(Arrays.asList(1, 3, 9)));
+         assertTrue("expect removed", graph.vertices().size() == 3);
+     }
+    
 }
