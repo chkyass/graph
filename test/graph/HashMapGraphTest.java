@@ -9,7 +9,6 @@ public class HashMapGraphTest extends GraphInstanceTest {
         return new HashtableGraph<>();
     }
     
-    
     @Test
     public void printNodeAlone() {
         HashtableGraph<Integer> graph = new HashtableGraph<>();
@@ -21,7 +20,7 @@ public class HashMapGraphTest extends GraphInstanceTest {
     public void printLoop() {
         HashtableGraph<String> graph = new HashtableGraph<>();
         graph.set("a", "a", 1000);
-        graph.writeToPng("test/graph/printsloop");
+        graph.writeToPng("test/graph/prints/printsloop");
     }
     
     @Test
