@@ -2,11 +2,8 @@ package graph;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
+import java.util.*;
+import java.util.function.Consumer;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
@@ -23,11 +20,14 @@ import static guru.nidi.graphviz.model.Factory.*;
  * 
  * @param <L> type of vertex labels in this graph. Must implement toString() and be immutable
  */
-public class HashtableGraph<L> implements Graph<L> {
-    private HashMap<L, HashMap<L, Double>> graph;    
-    private HashMap<L, HashMap<L, Double>> sources;
-    
-    public HashtableGraph() {
+public class AdjListGraph<L> implements Graph<L> {
+    private HashMap<L, Map<L, Double>> graph;
+    private HashMap<L, Map<L, Double>> sources;
+    private enum Mode {
+        dfs, bfs
+    }
+
+    public AdjListGraph() {
         this.graph = new HashMap<>();
         this.sources = new HashMap<>();
     }
@@ -41,25 +41,26 @@ public class HashtableGraph<L> implements Graph<L> {
 
     @Override
     public double set(L source, L target, double weight) {
-        // In case target does not exist
+        // create target if it does not exist
         this.add(target);
         
-        // Update the target parents
+        // Update the list of parents of the target
         if(sources.containsKey(target))
             sources.get(target).put(source, weight);
         else {
-            HashMap<L, Double> src = new HashMap<>();
+            Map<L, Double> src = new HashMap<>();
             src.put(source, weight);
             sources.put(target, src);
         }
-        
-        // Update the source children
+
+        // The two vertex exists. Create or update the edge
         if(graph.containsKey(source)) {
             Double ret = graph.get(source).put(target, weight);
             return ret == null ? 0 : ret ;
         }
-        
-        HashMap<L, Double> targets = new HashMap<>();
+
+        // Source does not exist, create it and link it to target
+        Map<L, Double> targets = new HashMap<>();
         targets.put(target, weight);
         graph.put(source, targets);     
         return 0;
@@ -67,14 +68,15 @@ public class HashtableGraph<L> implements Graph<L> {
 
     @Override
     public boolean remove(L vertex) {
-        HashMap<L, Double> s = sources.get(vertex);
+        Map<L, Double> s = sources.get(vertex);
         if (s != null) {
+            // remove edges pointing to vertex
             for (L source : s.keySet()) {
                 if(graph.containsKey(source))
-                    graph.get(source).keySet().removeIf(e -> e.equals(vertex));
+                    graph.get(source).keySet().remove(vertex);
             }
         }
-            
+
         return graph.remove(vertex) != null;
     }
 
@@ -92,10 +94,82 @@ public class HashtableGraph<L> implements Graph<L> {
     public Map<L, Double> targets(L source) {
         return this.graph.get(source);
     }
-    
+
+
+    /**
+     * Helper for DFS and BFS. Is used to walk through connected nodes of the graph from a given source
+     *
+     * @param seen store all already seen nodes for cycle detection
+     * @param next store next unseen nodes to visit. Element ordering depend on the mode of visit
+     *             DFS or BFS
+     * @param func to apply to all nodes
+     * @param mode DFS or BFS
+     */
+    private void graphWalk(Set<L> seen, Deque<L> next, Consumer<L> func, Mode mode) {
+        while (!next.isEmpty()) {
+            L vertex = next.pop();
+            func.accept(vertex);
+
+            seen.add(vertex);
+            for(L neigh : graph.get(vertex).keySet()){
+                if(!seen.contains(neigh)) {
+                    if(mode == Mode.dfs)
+                        next.addFirst(neigh);
+                    else if(mode == Mode.bfs)
+                        next.addLast(neigh);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void dfs(Consumer<L> function) {
+        Deque<L> next = new ArrayDeque<>();
+        Set<L> seen = new HashSet<>();
+
+        for(L vertex : graph.keySet()){
+            if(!seen.contains(vertex))
+                graphWalk(seen, next, function, Mode.dfs);
+        }
+    }
+
+    @Override
+    public void dfs(L vertex, Consumer<L> function) {
+        if(!graph.containsKey(vertex))
+            return;
+
+        Deque<L> next = new ArrayDeque<>();
+        next.add(vertex);
+        Set<L> seen = new HashSet<>();
+        graphWalk(seen, next, function, Mode.dfs);
+    }
+
+
+    @Override
+    public void bfs(Consumer<L> function) {
+        ArrayDeque<L> next = new ArrayDeque<>();
+        Set<L> seen = new HashSet<>();
+
+        for(L vertex : graph.keySet()){
+            if(!seen.contains(vertex))
+                graphWalk(seen, next, function, Mode.bfs);
+        }
+    }
+
+    @Override
+    public void bfs(L vertex, Consumer<L> function) {
+        if(!graph.containsKey(vertex))
+            return;
+
+        Deque<L> next = new ArrayDeque<>();
+        next.add(vertex);
+        Set<L> seen = new HashSet<>();
+        graphWalk(seen, next, function, Mode.bfs);
+    }
+
     /** 
      * Write the graph into a png. Use the Ggraphviz-java library to do this
-     * Use of mutable graph to avoid useless copies.
+     *
      * @param filename of the png in which the graph will be drawn.
      *        Accept full and relative paths.
      */
