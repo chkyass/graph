@@ -1,11 +1,13 @@
 package graph;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * Tests for instance methods of Graph.
@@ -239,6 +241,41 @@ public abstract class GraphInstanceTest {
         lambda_result = new StringBuilder();
         graph.bfs('a', n -> lambda_result.append(n));
         assertTrue(lambda_result.toString().equals("abdce"));
+    }
+
+    @Test
+    public void minimumSpanningTree() {
+        AdjListGraph<Integer> graph = new AdjListGraph<>();
+        graph.set(1, 2, 1);
+        graph.set(2, 3, 2);
+        graph.set(1, 3, 3);
+        graph.set(4, 3, 5);
+        graph.set(1, 4, 4);
+        assertEquals(graph.minimumSpanningTree(e -> e), 7);
+    }
+
+    @Test
+    public void dijkstra(){
+        AdjListGraph<Character> graph = new AdjListGraph<>();
+        graph.set('s', 'a', 10);
+        graph.set('s', 'c', 5);
+        graph.set('c', 'a', 3);
+        graph.set('a', 'c', 2);
+        graph.set('a', 'b', 1);
+        graph.set('c', 'b', 9);
+        graph.set('c', 'd', 2);
+        graph.set('b', 'd', 4);
+        graph.set('d', 'b', 6);
+
+        Map<Character, Double> res = graph.dijkstra('s');
+        System.out.println(res);
+        assertTrue(res.get('s') == 0.0);
+        assertTrue(res.get('a') == 8.0);
+        assertTrue(res.get('c') == 5.0);
+        assertTrue(res.get('b') == 9.0);
+        assertTrue(res.get('d') == 7.0);
+
+
     }
     
 }
