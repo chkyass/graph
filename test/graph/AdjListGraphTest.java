@@ -2,7 +2,7 @@ package graph;
 
 import org.junit.Test;
 
-public class HashMapGraphTest extends GraphInstanceTest {
+public class AdjListGraphTest extends GraphInstanceTest {
     
     public <T> Graph<T> emptyInstance() {
         return new AdjListGraph<>();

@@ -1,11 +1,11 @@
 package graph;
 
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collections;
-
-import org.junit.Test;
 
 /**
  * Tests for instance methods of Graph.
@@ -213,5 +213,32 @@ public abstract class GraphInstanceTest {
          assertTrue("expect removed", graph.vertices().containsAll(Arrays.asList(1, 3, 9)));
          assertTrue("expect removed", graph.vertices().size() == 3);
      }
+
+    private StringBuilder lambda_result;
+
+    @Test
+    public void dfs() {
+         AdjListGraph<Character> graph = new AdjListGraph<>();
+         graph.set('a', 'b', 3);
+         graph.set('b', 'c', 5);
+         graph.set('a', 'd', 0);
+         graph.set('d', 'e', 4);
+         lambda_result = new StringBuilder();
+         graph.dfs('a', n -> lambda_result.append(n));
+         assertTrue(lambda_result.toString().equals("abcde")
+                 || lambda_result.toString().equals("adebc"));
+    }
+
+    @Test
+    public void bfs() {
+        AdjListGraph<Character> graph = new AdjListGraph<>();
+        graph.set('a', 'b', 3);
+        graph.set('b', 'c', 5);
+        graph.set('a', 'd', 0);
+        graph.set('d', 'e', 4);
+        lambda_result = new StringBuilder();
+        graph.bfs('a', n -> lambda_result.append(n));
+        assertTrue(lambda_result.toString().equals("abdce"));
+    }
     
 }
