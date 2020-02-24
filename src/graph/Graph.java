@@ -111,5 +111,24 @@ public interface Graph<L> {
      */
     void bfs(L vertex, Consumer<L> function);
 
+    /**
+     * Take a graph and return the minimum cost of the acyclic connected graph associated to it
+     * Kruskal algorithm is used in conjunction with UnionFind data structure for optimal result
+     *
+     * @param func Function to map a Vertex to a unique integer id to be used in UnionFind
+     * @retun The cost of the minimum spanning tree
+     */
+    int minimumSpanningTree(Function<L, Integer> func);
 
+
+    /**
+     * @Precondition Non negative edges
+     *
+     * Implementation of dijkstra algorithm. Find the cost of the shortest path from src to all the vertices
+     * connected to src. Disconnected vertices are ignored
+     *
+     * @param src Vertex from which shortest path is computed
+     * @return Map associating a vertex to the cost of the shortest path to it
+     */
+    Map<L, Double>dijkstra(L src);
 }

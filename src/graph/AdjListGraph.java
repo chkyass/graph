@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
@@ -23,8 +25,32 @@ import static guru.nidi.graphviz.model.Factory.*;
 public class AdjListGraph<L> implements Graph<L> {
     private HashMap<L, Map<L, Double>> graph;
     private HashMap<L, Map<L, Double>> sources;
+
     private enum Mode {
         dfs, bfs
+    }
+
+    private class Edge {
+        L src;
+        L dst;
+        Double value;
+
+        public Edge(L src, L dst, Double value) {
+            this.src = src;
+            this.dst = dst;
+            this.value = value;
+        }
+
+    }
+
+    private class Pair {
+        L vertex;
+        Double cost;
+
+        public Pair(L vertex, Double cost) {
+            this.vertex = vertex;
+            this.cost = cost;
+        }
     }
 
     public AdjListGraph() {
@@ -166,6 +192,84 @@ public class AdjListGraph<L> implements Graph<L> {
         Set<L> seen = new HashSet<>();
         graphWalk(seen, next, function, Mode.bfs);
     }
+
+    @Override
+    public int minimumSpanningTree(Function<L, Integer> vertex_index) {
+        //Get list of edges
+        List<Edge> edges = new ArrayList<>();
+        for(L src : graph.keySet()) {
+            for(L dst : graph.get(src).keySet()) {
+                edges.add(new Edge(src, dst, graph.get(src).get(dst)));
+            }
+        }
+
+        //Sort edges
+        Collections.sort(edges, Comparator.comparingDouble(e -> e.value));
+        UnionFind unionFind = new UnionFind(edges.size());
+
+        int nb_edge = 0;
+        int cost = 0;
+
+        for(Edge edge : edges) {
+            if(nb_edge >= graph.keySet().size()-1) {
+                break;
+            }
+
+            Integer src = vertex_index.apply(edge.src);
+            Integer dst = vertex_index.apply(edge.dst);
+
+            //If the two vertex belongs to to the same set they are already connected
+            //so adding this edge will create a cycle because spanning tree is an undirected tree
+            if(!unionFind.find(src, dst)) {
+                nb_edge++;
+                cost += edge.value;
+                unionFind.union(src, dst);
+            }
+        }
+
+        return cost;
+    }
+
+    private void relaxVertex(L src, L neigh, Map<L, Double> shortestsPaths, Queue<Pair> next) {
+        Double previous_cost = shortestsPaths.get(neigh);
+        Double new_cost = shortestsPaths.get(src) + graph.get(src).get(neigh);
+        if(previous_cost == null || previous_cost > new_cost) {
+            shortestsPaths.put(neigh, new_cost);
+            next.add(new Pair(neigh, new_cost));
+        }
+    }
+
+    @Override
+    public Map<L, Double> dijkstra(L src) {
+        if(!graph.containsKey(src))
+            return new HashMap<>();
+
+        Map<L, Double> shortestsPaths = new HashMap<>();
+        Queue<Pair> next = new PriorityQueue<>(Comparator.comparingDouble(e -> e.cost));
+        Set<L> found = new HashSet<>();
+        shortestsPaths.put(src, 0.0);
+        next.add(new Pair(src, 0.0));
+
+        while(found.size() < graph.keySet().size()){
+            Pair vertex_pair = next.poll();
+            if(vertex_pair == null)
+                return shortestsPaths;
+            L vertex = vertex_pair.vertex;
+            if(found.contains(vertex))
+                continue;
+
+            found.add(vertex);
+
+            for(L neigh : graph.get(vertex).keySet()) {
+                if(found.contains(neigh))
+                    continue;
+                relaxVertex(vertex, neigh, shortestsPaths, next);
+            }
+        }
+
+        return shortestsPaths;
+    }
+
 
     /** 
      * Write the graph into a png. Use the Ggraphviz-java library to do this
